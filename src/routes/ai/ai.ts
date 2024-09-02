@@ -21,7 +21,7 @@ const app = new Hono<{
 //
 
 app.post(
-  "/run/text-generation",
+  "/text-generation",
   textGeneration.validateModel,
   textGeneration.validateInputs,
   async (c) => {
@@ -38,12 +38,12 @@ app.post(
 /**
  * Get the list of available text generation models
  */
-app.get("/run/text-generation/models", async (c) => {
+app.get("/text-generation/models", async (c) => {
   return c.json(aiModelsByType.BaseAiTextGenerationModels);
 });
 
 app.post(
-  "/run/text-to-image",
+  "/text-to-image",
   textToImage.validateModel,
   textToImage.validateInputs,
   async (c) => {
@@ -64,7 +64,7 @@ app.post(
 /**
  * Get the list of available text to image models
  */
-app.get("/run/text-to-image/models", async (c) => {
+app.get("/text-to-image/models", async (c) => {
   return c.json(aiModelsByType.BaseAiTextToImageModels);
 });
 
@@ -72,7 +72,7 @@ app.get("/run/text-to-image/models", async (c) => {
  * Get text from an image
  */
 app.post(
-  "/run/image-to-text",
+  "/image-to-text",
   imageToText.validateModel,
   imageToText.validateInputs,
   async (c) => {
@@ -89,12 +89,12 @@ app.post(
 /**
  * Get the list of available image to text models
  */
-app.get("/run/image-to-text/models", async (c) => {
+app.get("/image-to-text/models", async (c) => {
   return c.json(imageToText.BaseAiImageToTextModels);
 });
 
 app.post(
-  "/run/translation",
+  "/translation",
   translation.validateModel,
   translation.validateInputs,
   async (c) => {
@@ -111,7 +111,7 @@ app.post(
 /**
  * Get the list of available translation models
  */
-app.get("/run/translation/models", async (c) => {
+app.get("/translation/models", async (c) => {
   return c.json(translation.BaseAiTranslationModels);
 });
 

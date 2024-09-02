@@ -1,6 +1,11 @@
 import { createMiddleware } from "hono/factory";
 import { z } from "zod";
 
+export const BaseAiImageToTextModels = [
+  "@cf/unum/uform-gen2-qwen-500m",
+  "@cf/llava-hf/llava-1.5-7b-hf"
+];
+
 export const validateModel = createMiddleware(async (c, next) => {
   // HACK - Keep the models list in here so Studio AI generation can use it
   const MODELS = [

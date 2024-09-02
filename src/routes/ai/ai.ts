@@ -5,6 +5,7 @@ import type { Bindings } from "../../types";
 import * as textGeneration from "./text-generation";
 import * as textToImage from "./text-to-image";
 import * as imageToText from "./image-to-text";
+import * as translation from "./translation";
 import { aiModelsByType } from "./helpers";
 
 const app = new Hono<{
@@ -68,6 +69,30 @@ app.post("/run/image-to-text", imageToText.validateModel, imageToText.validateIn
   // @ts-expect-error - We need to do some validation here, build decoders for the possible cloudflare inputs
   const result = await c.env.AI.run(model, inputs);
   return c.json(result);
+});
+
+/**
+ * Get the list of available image to text models
+ */
+app.get("/run/image-to-text/models", async (c) => {
+  return c.json(imageToText.BaseAiImageToTextModels);
+});
+
+app.post("/run/translation", translation.validateModel, translation.validateInputs, async (c) => {
+  const model = c.req.query("model");
+  const inputs = c.get("inputs");
+  console.log("inputs", inputs);
+  console.log("model", model);
+  // @ts-expect-error - We need to do some validation here, build decoders for the possible cloudflare inputs
+  const result = await c.env.AI.run(model, inputs);
+  return c.json(result);
+});
+
+/**
+ * Get the list of available translation models
+ */
+app.get("/run/translation/models", async (c) => {
+  return c.json(translation.BaseAiTranslationModels);
 });
 
 export default app;

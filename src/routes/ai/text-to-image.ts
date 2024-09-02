@@ -8,7 +8,7 @@ export const validateModel = createMiddleware(async (c, next) => {
     "@cf/runwayml/stable-diffusion-v1-5-inpainting",
     "@cf/runwayml/stable-diffusion-v1-5-img2img",
     "@cf/lykon/dreamshaper-8-lcm",
-    "@cf/bytedance/stable-diffusion-xl-lightning"
+    "@cf/bytedance/stable-diffusion-xl-lightning",
   ];
 
   const model = c.req.query("model");
@@ -31,7 +31,10 @@ export const validateInputs = createMiddleware(async (c, next) => {
     image: z.array(z.number()).optional(),
     mask: z.array(z.number()).optional(),
     // Depends on model, some need to be less than 20 (SDXL)
-    num_steps: z.number().optional().describe("Number of steps to take in the image generation process"),
+    num_steps: z
+      .number()
+      .optional()
+      .describe("Number of steps to take in the image generation process"),
     strength: z.number().optional(),
     guidance: z.number().optional(),
   });

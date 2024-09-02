@@ -2,11 +2,11 @@ import { Hono } from "hono";
 
 import type { Bindings } from "../../types";
 
+import { aiModelsByType } from "./helpers";
+import * as imageToText from "./image-to-text";
 import * as textGeneration from "./text-generation";
 import * as textToImage from "./text-to-image";
-import * as imageToText from "./image-to-text";
 import * as translation from "./translation";
-import { aiModelsByType } from "./helpers";
 
 const app = new Hono<{
   Bindings: Bindings;
@@ -20,15 +20,20 @@ const app = new Hono<{
 //        and makes it easier to see what's going on in the Studio UI
 //
 
-app.post("/run/text-generation", textGeneration.validateModel, textGeneration.validateInputs, async (c) => {
-  const model = c.req.query("model");
-  const inputs = c.get("inputs");
-  console.log("inputs", inputs);
-  console.log("model", model);
-  // @ts-expect-error - We need to do some validation here, build decoders for the possible cloudflare inputs
-  const result = await c.env.AI.run(model, inputs);
-  return c.json(result);
-});
+app.post(
+  "/run/text-generation",
+  textGeneration.validateModel,
+  textGeneration.validateInputs,
+  async (c) => {
+    const model = c.req.query("model");
+    const inputs = c.get("inputs");
+    console.log("inputs", inputs);
+    console.log("model", model);
+    // @ts-expect-error - We need to do some validation here, build decoders for the possible cloudflare inputs
+    const result = await c.env.AI.run(model, inputs);
+    return c.json(result);
+  },
+);
 
 /**
  * Get the list of available text generation models
@@ -37,19 +42,24 @@ app.get("/run/text-generation/models", async (c) => {
   return c.json(aiModelsByType.BaseAiTextGenerationModels);
 });
 
-app.post("/run/text-to-image", textToImage.validateModel, textToImage.validateInputs, async (c) => {
-  const model = c.req.query("model");
-  const inputs = c.get("inputs");
-  console.log("inputs", inputs);
-  console.log("model", model);
-  // @ts-expect-error - We need to do some validation here, build decoders for the possible cloudflare inputs
-  const result = await c.env.AI.run(model, inputs);
+app.post(
+  "/run/text-to-image",
+  textToImage.validateModel,
+  textToImage.validateInputs,
+  async (c) => {
+    const model = c.req.query("model");
+    const inputs = c.get("inputs");
+    console.log("inputs", inputs);
+    console.log("model", model);
+    // @ts-expect-error - We need to do some validation here, build decoders for the possible cloudflare inputs
+    const result = await c.env.AI.run(model, inputs);
 
-  // NOTE - I think all of the models output a png, but need to check
-  c.header("Content-Type", "image/png");
+    // NOTE - I think all of the models output a png, but need to check
+    c.header("Content-Type", "image/png");
 
-  return c.body(result);
-});
+    return c.body(result);
+  },
+);
 
 /**
  * Get the list of available text to image models
@@ -61,15 +71,20 @@ app.get("/run/text-to-image/models", async (c) => {
 /**
  * Get text from an image
  */
-app.post("/run/image-to-text", imageToText.validateModel, imageToText.validateInputs, async (c) => {
-  const model = c.req.query("model");
-  const inputs = c.get("inputs");
-  console.log("inputs", inputs);
-  console.log("model", model);
-  // @ts-expect-error - We need to do some validation here, build decoders for the possible cloudflare inputs
-  const result = await c.env.AI.run(model, inputs);
-  return c.json(result);
-});
+app.post(
+  "/run/image-to-text",
+  imageToText.validateModel,
+  imageToText.validateInputs,
+  async (c) => {
+    const model = c.req.query("model");
+    const inputs = c.get("inputs");
+    console.log("inputs", inputs);
+    console.log("model", model);
+    // @ts-expect-error - We need to do some validation here, build decoders for the possible cloudflare inputs
+    const result = await c.env.AI.run(model, inputs);
+    return c.json(result);
+  },
+);
 
 /**
  * Get the list of available image to text models
@@ -78,15 +93,20 @@ app.get("/run/image-to-text/models", async (c) => {
   return c.json(imageToText.BaseAiImageToTextModels);
 });
 
-app.post("/run/translation", translation.validateModel, translation.validateInputs, async (c) => {
-  const model = c.req.query("model");
-  const inputs = c.get("inputs");
-  console.log("inputs", inputs);
-  console.log("model", model);
-  // @ts-expect-error - We need to do some validation here, build decoders for the possible cloudflare inputs
-  const result = await c.env.AI.run(model, inputs);
-  return c.json(result);
-});
+app.post(
+  "/run/translation",
+  translation.validateModel,
+  translation.validateInputs,
+  async (c) => {
+    const model = c.req.query("model");
+    const inputs = c.get("inputs");
+    console.log("inputs", inputs);
+    console.log("model", model);
+    // @ts-expect-error - We need to do some validation here, build decoders for the possible cloudflare inputs
+    const result = await c.env.AI.run(model, inputs);
+    return c.json(result);
+  },
+);
 
 /**
  * Get the list of available translation models

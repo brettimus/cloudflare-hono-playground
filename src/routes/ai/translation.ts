@@ -1,15 +1,11 @@
 import { createMiddleware } from "hono/factory";
 import { z } from "zod";
 
-export const BaseAiTranslationModels = [
-  "@cf/meta/m2m100-1.2b"
-];
+export const BaseAiTranslationModels = ["@cf/meta/m2m100-1.2b"];
 
 export const validateModel = createMiddleware(async (c, next) => {
   // HACK - Keep the models list in here so Studio AI generation can use it
-  const MODELS = [
-    "@cf/meta/m2m100-1.2b"
-  ];
+  const MODELS = ["@cf/meta/m2m100-1.2b"];
 
   const model = c.req.query("model");
   if (!model) {

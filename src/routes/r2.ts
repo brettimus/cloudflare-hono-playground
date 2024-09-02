@@ -31,7 +31,7 @@ app.get("/get/:key", async (c) => {
  * Example of uploading a file to the R2 bucket via a `multipart/form-data` upload
  *
  * Expects a form with a file field named "file"
- * 
+ *
  * @param key - The key of the object to upload
  * @returns - The uploaded object
  */
@@ -61,10 +61,10 @@ app.post("/put/:key", async (c) => {
 
 /**
  * Upload any old object to the R2 bucket, using the raw request body.
- * 
+ *
  * This relies on the content-type header to be set correctly by the client.
- * 
- * If you wanted to go a step further and detect the file type from the content itself 
+ *
+ * If you wanted to go a step further and detect the file type from the content itself
  * (in case the Content-Type header is not set or is incorrect),
  * you could use a library like file-type. However, this would require reading the entire file into memory, which might not be ideal for large files. In a Cloudflare Workers environment, you'd need to ensure such a library is compatible and doesn't exceed size limits.
  *
@@ -74,7 +74,8 @@ app.post("/put/:key", async (c) => {
 app.post("/put-raw/:key", async (c) => {
   const key = c.req.param("key");
   const body = c.req.raw.body;
-  const contentType = c.req.header("Content-Type") || "application/octet-stream";
+  const contentType =
+    c.req.header("Content-Type") || "application/octet-stream";
   const options: R2PutOptions = {
     httpMetadata: {
       contentType: contentType,
@@ -135,4 +136,3 @@ function mapR2HttpMetadataToHeaders(metadata?: R2HTTPMetadata): Headers {
 
   return headers;
 }
-

@@ -3,14 +3,14 @@ import { z } from "zod";
 
 export const BaseAiImageToTextModels = [
   "@cf/unum/uform-gen2-qwen-500m",
-  "@cf/llava-hf/llava-1.5-7b-hf"
+  "@cf/llava-hf/llava-1.5-7b-hf",
 ];
 
 export const validateModel = createMiddleware(async (c, next) => {
   // HACK - Keep the models list in here so Studio AI generation can use it
   const MODELS = [
     "@cf/unum/uform-gen2-qwen-500m",
-    "@cf/llava-hf/llava-1.5-7b-hf"
+    "@cf/llava-hf/llava-1.5-7b-hf",
   ];
 
   const model = c.req.query("model");
@@ -66,12 +66,14 @@ export const validateInputs = createMiddleware(async (c, next) => {
     presence_penalty: z.number().optional(),
     raw: z.boolean().optional(),
     // NOTE - Prompt and messages can clash
-    messages: z.array(
-      z.object({
-        role: z.enum(["user", "assistant", "system", "tool"]),
-        content: z.string(),
-      })
-    ).optional(),
+    messages: z
+      .array(
+        z.object({
+          role: z.enum(["user", "assistant", "system", "tool"]),
+          content: z.string(),
+        }),
+      )
+      .optional(),
   });
 
   const parsedInputs = AiImageToTextInputSchema.parse(inputs);
@@ -81,16 +83,21 @@ export const validateInputs = createMiddleware(async (c, next) => {
   await next();
 });
 
-
-const parseIntOrUndefined = (value: File | string | undefined): number | undefined =>
+const parseIntOrUndefined = (
+  value: File | string | undefined,
+): number | undefined =>
   value ? Number.parseInt(value as string, 10) : undefined;
 
-const parseFloatOrUndefined = (value: File | string | undefined): number | undefined =>
+const parseFloatOrUndefined = (
+  value: File | string | undefined,
+): number | undefined =>
   value ? Number.parseFloat(value as string) : undefined;
 
-const parseBooleanOrUndefined = (value: File | string | undefined): boolean | undefined => {
-  if (typeof value === 'string') {
-    return value.toLowerCase() === 'true';
+const parseBooleanOrUndefined = (
+  value: File | string | undefined,
+): boolean | undefined => {
+  if (typeof value === "string") {
+    return value.toLowerCase() === "true";
   }
   return undefined;
 };

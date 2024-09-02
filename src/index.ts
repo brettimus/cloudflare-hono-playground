@@ -1,9 +1,12 @@
-import { Hono } from 'hono'
+import { instrument } from "@fiberplane/hono-otel";
+import { Hono } from "hono";
 
-const app = new Hono()
+import type { Bindings } from "./types";
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+const app = new Hono<{ Bindings: Bindings }>();
 
-export default app
+app.get("/", (c) => {
+  return c.text("Hello Hono!");
+});
+
+export default instrument(app);

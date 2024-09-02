@@ -2,13 +2,18 @@
   "name": "cloudflare-hono-playground",
   "scripts": {
     "dev": "wrangler dev src/index.ts",
-    "deploy": "wrangler deploy --minify src/index.ts"
+    "studio": "npx @fiberplane/studio@latest",
+    "format": "biome check . --write",
+    "lint": "biome lint .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "hono": "^4.5.10"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
     "@cloudflare/workers-types": "^4.20240529.0",
-    "wrangler": "^3.57.2"
+    "@fiberplane/hono-otel": "^0.1.0-beta.11",
+    "wrangler": "^3.73.0"
   }
 }

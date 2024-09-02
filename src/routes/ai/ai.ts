@@ -4,6 +4,7 @@ import type { Bindings } from "../../types";
 
 import * as textGeneration from "./text-generation";
 import * as textToImage from "./text-to-image";
+import * as imageToText from "./image-to-text";
 import { aiModelsByType } from "./helpers";
 
 const app = new Hono<{
@@ -54,6 +55,19 @@ app.post("/run/text-to-image", textToImage.validateModel, textToImage.validateIn
  */
 app.get("/run/text-to-image/models", async (c) => {
   return c.json(aiModelsByType.BaseAiTextToImageModels);
+});
+
+/**
+ * Get text from an image
+ */
+app.post("/run/image-to-text", imageToText.validateModel, imageToText.validateInputs, async (c) => {
+  const model = c.req.query("model");
+  const inputs = c.get("inputs");
+  console.log("inputs", inputs);
+  console.log("model", model);
+  // @ts-expect-error - We need to do some validation here, build decoders for the possible cloudflare inputs
+  const result = await c.env.AI.run(model, inputs);
+  return c.json(result);
 });
 
 export default app;

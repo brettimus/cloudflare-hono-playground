@@ -28,14 +28,59 @@ app.get("/get/:key", async (c) => {
 });
 
 /**
- * Upload an object to the R2 bucket
+ * Example of uploading a file to the R2 bucket via a `multipart/form-data` upload
  *
+ * Expects a form with a file field named "file"
+ * 
  * @param key - The key of the object to upload
  * @returns - The uploaded object
  */
 app.post("/put/:key", async (c) => {
-  const object = await c.env.MY_BUCKET.put(c.req.param("key"), c.req.raw.body);
-  // TODO - 204? 201?
+  const key = c.req.param("key");
+
+  const formData = await c.req.parseBody();
+
+  const { file } = formData;
+
+  // Validate the file is a File
+  if (!(file instanceof File)) {
+    return c.json(
+      { message: "The 'file' field must be a File", actualType: typeof file },
+      422,
+    );
+  }
+
+  const options: R2PutOptions = {
+    httpMetadata: { contentType: file.type },
+  };
+
+  const object = await c.env.MY_BUCKET.put(key, file, options);
+
+  return c.json(object, 201);
+});
+
+/**
+ * Upload any old object to the R2 bucket, using the raw request body.
+ * 
+ * This relies on the content-type header to be set correctly by the client.
+ * 
+ * If you wanted to go a step further and detect the file type from the content itself 
+ * (in case the Content-Type header is not set or is incorrect),
+ * you could use a library like file-type. However, this would require reading the entire file into memory, which might not be ideal for large files. In a Cloudflare Workers environment, you'd need to ensure such a library is compatible and doesn't exceed size limits.
+ *
+ * @param key - The key of the object to upload
+ * @returns - The uploaded object
+ */
+app.post("/put-raw/:key", async (c) => {
+  const key = c.req.param("key");
+  const body = c.req.raw.body;
+  const contentType = c.req.header("Content-Type") || "application/octet-stream";
+  const options: R2PutOptions = {
+    httpMetadata: {
+      contentType: contentType,
+    },
+  };
+  const object = await c.env.MY_BUCKET.put(key, body, options);
   return c.json(object, 201);
 });
 

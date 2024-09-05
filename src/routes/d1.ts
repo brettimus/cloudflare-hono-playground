@@ -8,6 +8,11 @@ const app = new Hono<{
 
 /**
  * Execute a D1 query
+ *
+ * The database is local and does not have any data,
+ * so you may need to create a table and insert some data first.
+ *
+ * Alternatively, try a query like `SELECT 1;` to see if the connection is working.
  */
 app.post("/query", async (c) => {
   const { query } = await c.req.json();

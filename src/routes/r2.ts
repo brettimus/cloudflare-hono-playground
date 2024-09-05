@@ -6,13 +6,17 @@ const app = new Hono<{
   Bindings: Bindings;
 }>();
 
-// List all objects in the R2 bucket
+/**
+ * List all objects in the R2 bucket
+ */
 app.get("/list", async (c) => {
   const objects = await c.env.MY_BUCKET.list();
   return c.json(objects);
 });
 
-// Get a specific object from the R2 bucket
+/**
+ * Get a specific object from the R2 bucket
+ */
 app.get("/get/:key", async (c) => {
   const object = await c.env.MY_BUCKET.get(c.req.param("key"));
 
@@ -28,7 +32,7 @@ app.get("/get/:key", async (c) => {
 });
 
 /**
- * Example of uploading a file to the R2 bucket via a `multipart/form-data` upload
+ * Example of uploading a file to the R2 bucket via a `multipart/form-data` upload.
  *
  * Expects a form with a file field named "file"
  *
@@ -62,11 +66,15 @@ app.post("/put/:key", async (c) => {
 /**
  * Upload any old object to the R2 bucket, using the raw request body.
  *
- * This relies on the content-type header to be set correctly by the client.
+ * This relies on the `Content-Type` header to be set correctly by the client.
  *
- * If you wanted to go a step further and detect the file type from the content itself
- * (in case the Content-Type header is not set or is incorrect),
- * you could use a library like file-type. However, this would require reading the entire file into memory, which might not be ideal for large files. In a Cloudflare Workers environment, you'd need to ensure such a library is compatible and doesn't exceed size limits.
+ * If you wanted to go a step further and detect the file type from the content itself,
+ * in case the Content-Type header is not set or is incorrect,
+ * you could use a library like `file-type`.
+ * However, this would require reading the entire file into memory,
+ * which might not be ideal for large files.
+ * In a Cloudflare Workers environment, you'd need to ensure such a library is compatible
+ * and doesn't exceed size limits.
  *
  * @param key - The key of the object to upload
  * @returns - The uploaded object
@@ -103,7 +111,7 @@ app.delete("/delete/:key", async (c) => {
 export default app;
 
 /**
- * Helper function that returns the headers for a given R2 object
+ * Helper function that returns the correct headers for a given R2 object
  *
  * @param metadata - The R2 HTTP metadata
  * @returns - The headers

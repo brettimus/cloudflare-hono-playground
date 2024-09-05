@@ -1,13 +1,25 @@
-import { createMiddleware } from "hono/factory";
+import { Hono } from "hono";
 import { z } from "zod";
+import type { Bindings } from "../../types";
+import { aiModelsByType } from "./helpers";
 
-export const BaseAiImageToTextModels = [
-  "@cf/unum/uform-gen2-qwen-500m",
-  "@cf/llava-hf/llava-1.5-7b-hf",
-];
+const app = new Hono<{ Bindings: Bindings }>();
 
-export const validateModel = createMiddleware(async (c, next) => {
-  // HACK - Keep the models list in here so Studio AI generation can use it
+/**
+ * Get the list of available image-to-text models
+ */
+app.get("/models", async (c) => {
+  return c.json(aiModelsByType.BaseAiImageToTextModels);
+});
+
+/**
+ * Generate text from an image using a model on Workers AI.
+ *
+ * Note that to support Fiberplane Studio's AI Request Generation,
+ * we need to do validation either in the handler or in middleware,
+ * while keeping all possible input values clear in the code.
+ */
+app.post("/", async (c) => {
   const MODELS = [
     "@cf/unum/uform-gen2-qwen-500m",
     "@cf/llava-hf/llava-1.5-7b-hf",
@@ -22,12 +34,9 @@ export const validateModel = createMiddleware(async (c, next) => {
     return c.json({ message: "Invalid model", choices: MODELS }, 400);
   }
 
-  await next();
-});
+  console.log("Running model:", model);
 
-export const validateInputs = createMiddleware(async (c, next) => {
   // We need to do this as a multipart/form-data request to be able to attach a file in the Fiberplane Studio UI in a sane way
-  // TODO - Convert inputs.image to a buffer
   const formData = await c.req.parseBody();
 
   let imageArray: number[] = [];
@@ -48,13 +57,10 @@ export const validateInputs = createMiddleware(async (c, next) => {
     frequency_penalty: parseFloatOrUndefined(formData.frequency_penalty),
     presence_penalty: parseFloatOrUndefined(formData.presence_penalty),
     raw: parseBooleanOrUndefined(formData.raw),
-    // NOTE - This is too unwieldy for Studio, but in theory you would pass the messages as a JSON string...
-    // messages: formData.messages ? JSON.parse(formData.messages as string) : undefined,
   };
 
   const AiImageToTextInputSchema = z.object({
     image: z.array(z.number()),
-    // NOTE - Prompt and messages can clash
     prompt: z.string().optional(),
     max_tokens: z.number().optional(),
     temperature: z.number().optional(),
@@ -65,22 +71,16 @@ export const validateInputs = createMiddleware(async (c, next) => {
     frequency_penalty: z.number().optional(),
     presence_penalty: z.number().optional(),
     raw: z.boolean().optional(),
-    // NOTE - Prompt and messages can clash
-    messages: z
-      .array(
-        z.object({
-          role: z.enum(["user", "assistant", "system", "tool"]),
-          content: z.string(),
-        }),
-      )
-      .optional(),
   });
 
   const parsedInputs = AiImageToTextInputSchema.parse(inputs);
 
-  c.set("inputs", parsedInputs);
-
-  await next();
+  console.log("Using inputs:", parsedInputs);
+  const result = await c.env.AI.run(
+    model as BaseAiImageToTextModels,
+    parsedInputs,
+  );
+  return c.json(result);
 });
 
 const parseIntOrUndefined = (
@@ -101,3 +101,5 @@ const parseBooleanOrUndefined = (
   }
   return undefined;
 };
+
+export default app;

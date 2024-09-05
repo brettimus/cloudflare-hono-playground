@@ -1,7 +1,27 @@
-import { createMiddleware } from "hono/factory";
+import { Hono } from "hono";
 import { z } from "zod";
+import type { Bindings } from "../../types";
+import { aiModelsByType } from "./helpers";
 
-export const validateModel = createMiddleware(async (c, next) => {
+const app = new Hono<{ Bindings: Bindings }>();
+
+/**
+ * Get the list of available text generation models
+ */
+app.get("/models", async (c) => {
+  return c.json(aiModelsByType.BaseAiTextGenerationModels);
+});
+
+/**
+ * Generate text from a model on Workers AI.
+ *
+ * Note that to support Fiberplane Studio's AI Request Generation,
+ * we need to do validation either in the handler or in middleware,
+ * while keeping all possible input values clear in the code.
+ *
+ * That's why this handler has so much inline validation logic.
+ */
+app.post("/", async (c) => {
   const MODELS = [
     "@cf/meta/llama-3.1-8b-instruct",
     "@cf/meta/llama-3-8b-instruct",
@@ -42,6 +62,7 @@ export const validateModel = createMiddleware(async (c, next) => {
   ];
 
   const model = c.req.query("model");
+
   if (!model) {
     return c.json({ message: "Missing model parameter" }, 422);
   }
@@ -50,10 +71,10 @@ export const validateModel = createMiddleware(async (c, next) => {
     return c.json({ message: "Invalid model", choices: MODELS }, 400);
   }
 
-  await next();
-});
+  console.log("Running model:", model);
 
-export const validateInputs = createMiddleware(async (c, next) => {
+  // Now validate the inputs
+  // TODO - Separate into middleware
   const inputs = await c.req.json();
 
   const AiTextGenerationInputSchema = z.object({
@@ -104,7 +125,12 @@ export const validateInputs = createMiddleware(async (c, next) => {
 
   const parsedInputs = AiTextGenerationInputSchema.parse(inputs);
 
-  c.set("inputs", parsedInputs);
-
-  await next();
+  console.log("Using inputs:", parsedInputs);
+  const result = await c.env.AI.run(
+    model as BaseAiTextGenerationModels,
+    inputs,
+  );
+  return c.json(result);
 });
+
+export default app;

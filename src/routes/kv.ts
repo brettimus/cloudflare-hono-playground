@@ -6,7 +6,9 @@ const app = new Hono<{
   Bindings: Bindings;
 }>();
 
-// Get a key from the KV namespace
+/**
+ * Get a key from the KV namespace
+ */
 app.get("/get/:key", async (c) => {
   const key = c.req.param("key");
   const value = await c.env.MY_KV_NAMESPACE.get(key);
@@ -18,8 +20,6 @@ app.get("/get/:key", async (c) => {
 
 /**
  * Put a value into the KV namespace
- *
- * @returns - The value
  */
 app.put("/put/:key", async (c) => {
   const key = c.req.param("key");
@@ -29,12 +29,7 @@ app.put("/put/:key", async (c) => {
 });
 
 /**
- * Example of uploading a file to the R2 bucket via a `multipart/form-data` upload
- *
- * Expects a form with a file field named "file"
- *
- * @param key - The key of the object to upload
- * @returns - The uploaded object
+ * Delete a key from the KV namespace
  */
 app.delete("/delete/:key", async (c) => {
   const key = c.req.param("key");

@@ -5,18 +5,18 @@ import type { Bindings } from "../../types";
 const app = new Hono<{ Bindings: Bindings }>();
 
 /**
- * Get the list of available translation models
+ * Get the list of available text classification models
  */
 app.get("/models", (c) => {
-  const MODELS = ["@cf/meta/m2m100-1.2b"];
+  const MODELS = ["@cf/huggingface/distilbert-sst-2-int8"];
   return c.json(MODELS);
 });
 
 /**
- * Translate text using a model on Workers AI.
+ * Classify text using a model on Workers AI.
  */
 app.post("/", async (c) => {
-  const MODELS = ["@cf/meta/m2m100-1.2b"];
+  const MODELS = ["@cf/huggingface/distilbert-sst-2-int8"];
 
   const model = c.req.query("model");
   if (!model) {
@@ -29,16 +29,17 @@ app.post("/", async (c) => {
 
   const inputs = await c.req.json();
 
-  const AiTranslationInputSchema = z.object({
+  const AiTextClassificationInputSchema = z.object({
     text: z.string(),
-    target_lang: z.string(),
-    source_lang: z.string().optional(),
   });
 
-  const parsedInputs = AiTranslationInputSchema.parse(inputs);
+  const parsedInputs = AiTextClassificationInputSchema.parse(inputs);
 
   console.log("Using inputs:", parsedInputs);
-  const result = await c.env.AI.run(model, parsedInputs);
+  const result = await c.env.AI.run(
+    model as BaseAiTextClassificationModels,
+    parsedInputs,
+  );
   return c.json(result);
 });
 

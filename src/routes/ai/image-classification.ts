@@ -20,7 +20,7 @@ app.get("/models", async (c) => {
  * while keeping all possible input values clear in the code.
  */
 app.post("/", async (c) => {
-  const MODELS = aiModelsByType.BaseAiImageClassificationModels;
+  const MODELS = ["@cf/microsoft/resnet-50"];
 
   const model = c.req.query("model");
   if (!model) {
